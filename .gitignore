@@ -7,6 +7,10 @@
 /topology.html
 /topology.dot
 
+# Exploratory raw dumps (unsanitized: contain account id / tags)
+raw.json
+*.raw.json
+
 # Test & coverage artifacts
 *.out
 coverage.*
