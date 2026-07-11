@@ -11,6 +11,9 @@
 raw.json
 *.raw.json
 
+# Task runner cache
+.task/
+
 # Test & coverage artifacts
 *.out
 coverage.*
