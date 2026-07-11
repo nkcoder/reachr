@@ -1,0 +1,15 @@
+# Binary
+/reachr
+/dist/
+
+# Snapshot / render outputs (fixtures live under testdata/)
+/topology.json
+/topology.html
+/topology.dot
+
+# Test & coverage artifacts
+*.out
+coverage.*
+
+# OS / editor
+.DS_Store
