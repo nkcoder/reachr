@@ -18,8 +18,11 @@ renders an interactive whole-VPC topology, plus a reachability engine that expla
 
 ## Development
 
+Uses [Task](https://taskfile.dev) (`brew install go-task`) as the task runner.
+
 ```sh
-make build   # build the reachr binary
-make test    # run tests
-make lint    # golangci-lint
+task           # list available tasks
+task build     # build the reachr binary
+task test      # run tests
+task lint      # golangci-lint
 ```

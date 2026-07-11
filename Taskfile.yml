@@ -1,0 +1,41 @@
+version: "3"
+
+silent: true
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the reachr binary
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+    generates:
+      - reachr
+    cmds:
+      - go build -o reachr .
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test ./...
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run
+
+  tidy:
+    desc: Tidy module dependencies
+    cmds:
+      - go mod tidy
+
+  run:
+    desc: Build and print CLI help
+    deps: [build]
+    cmds:
+      - ./reachr --help
