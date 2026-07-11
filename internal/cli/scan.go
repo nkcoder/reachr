@@ -11,6 +11,7 @@ import (
 var (
 	scanRegion  string
 	scanProfile string
+	scanVPC     string
 	scanFilter  string
 	scanOutput  string
 	scanRaw     bool
@@ -37,7 +38,7 @@ func runRawDump(cmd *cobra.Command) error {
 	if err != nil {
 		return fmt.Errorf("load aws config: %w", err)
 	}
-	raw, err := client.DumpBackbone(ctx)
+	raw, err := client.DumpBackbone(ctx, scanVPC)
 	if err != nil {
 		return fmt.Errorf("dump backbone: %w", err)
 	}
@@ -50,6 +51,7 @@ func init() {
 	f := scanCmd.Flags()
 	f.StringVar(&scanRegion, "region", "", "AWS region to scan (required)")
 	f.StringVar(&scanProfile, "profile", "", "AWS profile (default credential chain if empty)")
+	f.StringVar(&scanVPC, "vpc", "", "scope scan to a single VPC id (default: whole region)")
 	f.StringVar(&scanFilter, "filter", "", "scope selector, e.g. tag:project=X")
 	f.StringVarP(&scanOutput, "output", "o", "topology.json", "snapshot output path")
 	f.BoolVar(&scanRaw, "raw", false, "exploratory: dump raw AWS backbone JSON to stdout")

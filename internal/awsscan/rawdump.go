@@ -3,6 +3,7 @@ package awsscan
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
@@ -40,45 +41,62 @@ func drain[Page, Item any](ctx context.Context, p paginator[Page], extract func(
 	return all, nil
 }
 
-// DumpBackbone collects the raw network backbone with pagination.
-func (c *Client) DumpBackbone(ctx context.Context) (*RawBackbone, error) {
+// DumpBackbone collects the raw network backbone with pagination. If vpcID is
+// non-empty the collection is scoped to that VPC; otherwise it spans the region.
+func (c *Client) DumpBackbone(ctx context.Context, vpcID string) (*RawBackbone, error) {
 	out := &RawBackbone{Region: c.Region}
 	var err error
 
+	// VPCs are selected by id; every other resource filters on vpc-id.
+	var vpcIDs []string
+	if vpcID != "" {
+		vpcIDs = []string{vpcID}
+	}
+	byVPC := vpcFilter(vpcID, "vpc-id")
+
 	if out.VPCs, err = drain(ctx,
-		ec2.NewDescribeVpcsPaginator(c.EC2, &ec2.DescribeVpcsInput{}),
+		ec2.NewDescribeVpcsPaginator(c.EC2, &ec2.DescribeVpcsInput{VpcIds: vpcIDs}),
 		func(p *ec2.DescribeVpcsOutput) []types.Vpc { return p.Vpcs }); err != nil {
 		return nil, err
 	}
 	if out.Subnets, err = drain(ctx,
-		ec2.NewDescribeSubnetsPaginator(c.EC2, &ec2.DescribeSubnetsInput{}),
+		ec2.NewDescribeSubnetsPaginator(c.EC2, &ec2.DescribeSubnetsInput{Filters: byVPC}),
 		func(p *ec2.DescribeSubnetsOutput) []types.Subnet { return p.Subnets }); err != nil {
 		return nil, err
 	}
 	if out.RouteTables, err = drain(ctx,
-		ec2.NewDescribeRouteTablesPaginator(c.EC2, &ec2.DescribeRouteTablesInput{}),
+		ec2.NewDescribeRouteTablesPaginator(c.EC2, &ec2.DescribeRouteTablesInput{Filters: byVPC}),
 		func(p *ec2.DescribeRouteTablesOutput) []types.RouteTable { return p.RouteTables }); err != nil {
 		return nil, err
 	}
 	if out.InternetGateways, err = drain(ctx,
-		ec2.NewDescribeInternetGatewaysPaginator(c.EC2, &ec2.DescribeInternetGatewaysInput{}),
+		ec2.NewDescribeInternetGatewaysPaginator(c.EC2, &ec2.DescribeInternetGatewaysInput{Filters: vpcFilter(vpcID, "attachment.vpc-id")}),
 		func(p *ec2.DescribeInternetGatewaysOutput) []types.InternetGateway { return p.InternetGateways }); err != nil {
 		return nil, err
 	}
 	if out.NATGateways, err = drain(ctx,
-		ec2.NewDescribeNatGatewaysPaginator(c.EC2, &ec2.DescribeNatGatewaysInput{}),
+		ec2.NewDescribeNatGatewaysPaginator(c.EC2, &ec2.DescribeNatGatewaysInput{Filter: byVPC}),
 		func(p *ec2.DescribeNatGatewaysOutput) []types.NatGateway { return p.NatGateways }); err != nil {
 		return nil, err
 	}
 	if out.NetworkInterfaces, err = drain(ctx,
-		ec2.NewDescribeNetworkInterfacesPaginator(c.EC2, &ec2.DescribeNetworkInterfacesInput{}),
+		ec2.NewDescribeNetworkInterfacesPaginator(c.EC2, &ec2.DescribeNetworkInterfacesInput{Filters: byVPC}),
 		func(p *ec2.DescribeNetworkInterfacesOutput) []types.NetworkInterface { return p.NetworkInterfaces }); err != nil {
 		return nil, err
 	}
 	if out.SecurityGroups, err = drain(ctx,
-		ec2.NewDescribeSecurityGroupsPaginator(c.EC2, &ec2.DescribeSecurityGroupsInput{}),
+		ec2.NewDescribeSecurityGroupsPaginator(c.EC2, &ec2.DescribeSecurityGroupsInput{Filters: byVPC}),
 		func(p *ec2.DescribeSecurityGroupsOutput) []types.SecurityGroup { return p.SecurityGroups }); err != nil {
 		return nil, err
 	}
 	return out, nil
+}
+
+// vpcFilter builds a single-value EC2 filter on the given attribute, or nil when
+// vpcID is empty (region-wide collection).
+func vpcFilter(vpcID, name string) []types.Filter {
+	if vpcID == "" {
+		return nil
+	}
+	return []types.Filter{{Name: aws.String(name), Values: []string{vpcID}}}
 }
