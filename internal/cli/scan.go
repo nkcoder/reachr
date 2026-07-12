@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/nkcoder/reachr/internal/awsscan"
+	"github.com/nkcoder/reachr/internal/topology"
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +17,7 @@ var (
 	scanFilter  string
 	scanOutput  string
 	scanRaw     bool
+	scanScrub   bool
 )
 
 var scanCmd = &cobra.Command{
@@ -47,6 +49,9 @@ func runScan(cmd *cobra.Command) error {
 		return fmt.Errorf("scan backbone: %w", err)
 	}
 	snap := raw.ToSnapshot(account, scanFilter)
+	if scanScrub {
+		topology.Sanitize(snap)
+	}
 
 	f, err := os.Create(scanOutput)
 	if err != nil {
@@ -91,5 +96,6 @@ func init() {
 	f.StringVar(&scanFilter, "filter", "", "scope selector, e.g. tag:project=X")
 	f.StringVarP(&scanOutput, "output", "o", "topology.json", "snapshot output path")
 	f.BoolVar(&scanRaw, "raw", false, "exploratory: dump raw AWS backbone JSON to stdout")
+	f.BoolVar(&scanScrub, "scrub", false, "redact the AWS account id (for shareable snapshots / fixtures)")
 	_ = scanCmd.MarkFlagRequired("region")
 }

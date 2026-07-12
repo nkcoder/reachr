@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "scannedAt": "2026-07-12T09:58:23Z",
+  "region": "ap-southeast-2",
+  "account": "000000000000",
+  "toolVersion": "reachr (fixture)",
+  "vpcs": [
+    {
+      "id": "vpc-0c37291497fa9f1fe",
+      "cidrBlocks": [
+        "10.20.0.0/16"
+      ],
+      "isDefault": false,
+      "state": "available",
+      "tags": {
+        "Name": "reachr-testenv",
+        "managedBy": "terraform",
+        "project": "reachr-testenv"
+      }
+    }
+  ],
+  "subnets": [
+    {
+      "id": "subnet-0b7cbca1c0a19d538",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "cidrBlock": "10.20.1.0/24",
+      "availabilityZone": "ap-southeast-2b",
+      "availabilityZoneId": "apse2-az1",
+      "mapPublicIpOnLaunch": false,
+      "arn": "arn:aws:ec2:ap-southeast-2:000000000000:subnet/subnet-0b7cbca1c0a19d538",
+      "tags": {
+        "Name": "reachr-testenv-private-ap-southeast-2b",
+        "managedBy": "terraform",
+        "project": "reachr-testenv"
+      }
+    },
+    {
+      "id": "subnet-0067d4e711ecd3e50",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "cidrBlock": "10.20.0.0/24",
+      "availabilityZone": "ap-southeast-2a",
+      "availabilityZoneId": "apse2-az3",
+      "mapPublicIpOnLaunch": false,
+      "arn": "arn:aws:ec2:ap-southeast-2:000000000000:subnet/subnet-0067d4e711ecd3e50",
+      "tags": {
+        "Name": "reachr-testenv-private-ap-southeast-2a",
+        "managedBy": "terraform",
+        "project": "reachr-testenv"
+      }
+    }
+  ],
+  "routeTables": [
+    {
+      "id": "rtb-00e7787efc430fbd2",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "main": true,
+      "subnetIds": null,
+      "routes": [
+        {
+          "destination": {
+            "kind": "cidr",
+            "value": "10.20.0.0/16"
+          },
+          "target": {
+            "kind": "local",
+            "id": "local"
+          },
+          "state": "active",
+          "origin": "CreateRouteTable"
+        }
+      ]
+    },
+    {
+      "id": "rtb-05ef41a62420f0302",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "main": false,
+      "subnetIds": [
+        "subnet-0067d4e711ecd3e50",
+        "subnet-0b7cbca1c0a19d538"
+      ],
+      "routes": [
+        {
+          "destination": {
+            "kind": "cidr",
+            "value": "10.20.0.0/16"
+          },
+          "target": {
+            "kind": "local",
+            "id": "local"
+          },
+          "state": "active",
+          "origin": "CreateRouteTable"
+        },
+        {
+          "destination": {
+            "kind": "prefix-list",
+            "value": "pl-6ca54005"
+          },
+          "target": {
+            "kind": "vpc-endpoint-gw",
+            "id": "vpce-0ec1a3bec0d211bda"
+          },
+          "state": "active",
+          "origin": "CreateRoute"
+        }
+      ],
+      "tags": {
+        "Name": "reachr-testenv-private",
+        "managedBy": "terraform",
+        "project": "reachr-testenv"
+      }
+    }
+  ],
+  "internetGateways": null,
+  "natGateways": null,
+  "enis": [
+    {
+      "id": "eni-01b891bc8e35745b8",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "subnetId": "subnet-0b7cbca1c0a19d538",
+      "availabilityZone": "ap-southeast-2b",
+      "interfaceType": "interface",
+      "status": "in-use",
+      "privateIps": [
+        "10.20.1.208"
+      ],
+      "securityGroupIds": [
+        "sg-011cccd596fe3aece"
+      ],
+      "attachment": {
+        "instanceId": "i-0ea49b4de16a5abb8",
+        "instanceOwnerId": "000000000000",
+        "requesterManaged": false,
+        "deviceIndex": 0,
+        "status": "attached"
+      }
+    },
+    {
+      "id": "eni-09f86fceda72f73b9",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "subnetId": "subnet-0b7cbca1c0a19d538",
+      "availabilityZone": "ap-southeast-2b",
+      "description": "ELB app/reachr-testenv-alb/752640ba33773d03",
+      "interfaceType": "interface",
+      "status": "in-use",
+      "privateIps": [
+        "10.20.1.93"
+      ],
+      "securityGroupIds": [
+        "sg-0823865aa2bf98c46"
+      ],
+      "attachment": {
+        "instanceOwnerId": "amazon-elb",
+        "requesterId": "amazon-elb",
+        "requesterManaged": true,
+        "deviceIndex": 1,
+        "status": "attached"
+      }
+    },
+    {
+      "id": "eni-0076a3b5facf1da0e",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "subnetId": "subnet-0067d4e711ecd3e50",
+      "availabilityZone": "ap-southeast-2a",
+      "description": "ELB app/reachr-testenv-alb/752640ba33773d03",
+      "interfaceType": "interface",
+      "status": "in-use",
+      "privateIps": [
+        "10.20.0.132"
+      ],
+      "securityGroupIds": [
+        "sg-0823865aa2bf98c46"
+      ],
+      "attachment": {
+        "instanceOwnerId": "amazon-elb",
+        "requesterId": "amazon-elb",
+        "requesterManaged": true,
+        "deviceIndex": 1,
+        "status": "attached"
+      }
+    },
+    {
+      "id": "eni-05f4100d79348f49d",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "subnetId": "subnet-0067d4e711ecd3e50",
+      "availabilityZone": "ap-southeast-2a",
+      "interfaceType": "interface",
+      "status": "in-use",
+      "privateIps": [
+        "10.20.0.221"
+      ],
+      "securityGroupIds": [
+        "sg-011cccd596fe3aece"
+      ],
+      "attachment": {
+        "instanceId": "i-0d0426503a83c0710",
+        "instanceOwnerId": "000000000000",
+        "requesterManaged": false,
+        "deviceIndex": 0,
+        "status": "attached"
+      }
+    },
+    {
+      "id": "eni-04c527823f215a8ad",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "subnetId": "subnet-0067d4e711ecd3e50",
+      "availabilityZone": "ap-southeast-2a",
+      "description": "RDSNetworkInterface",
+      "interfaceType": "interface",
+      "status": "in-use",
+      "privateIps": [
+        "10.20.0.45"
+      ],
+      "securityGroupIds": [
+        "sg-03fc7dfa1919e23a4"
+      ],
+      "attachment": {
+        "instanceOwnerId": "amazon-rds",
+        "requesterId": "amazon-rds",
+        "requesterManaged": true,
+        "deviceIndex": 1,
+        "status": "attached"
+      }
+    }
+  ],
+  "securityGroups": [
+    {
+      "id": "sg-0823865aa2bf98c46",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "name": "reachr-testenv-alb",
+      "description": "ALB tier",
+      "arn": "arn:aws:ec2:ap-southeast-2:000000000000:security-group/sg-0823865aa2bf98c46",
+      "rules": [
+        {
+          "direction": "ingress",
+          "protocol": "tcp",
+          "fromPort": 80,
+          "toPort": 80,
+          "peer": {
+            "kind": "cidr",
+            "value": "10.20.0.0/16"
+          },
+          "description": "HTTP from within VPC"
+        },
+        {
+          "direction": "egress",
+          "protocol": "tcp",
+          "fromPort": 8080,
+          "toPort": 8080,
+          "peer": {
+            "kind": "sg",
+            "value": "sg-011cccd596fe3aece",
+            "account": "000000000000"
+          },
+          "description": "To app tier"
+        }
+      ],
+      "tags": {
+        "Name": "reachr-testenv-alb",
+        "managedBy": "terraform",
+        "project": "reachr-testenv"
+      }
+    },
+    {
+      "id": "sg-011cccd596fe3aece",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "name": "reachr-testenv-app",
+      "description": "App tier (stands in for ECS)",
+      "arn": "arn:aws:ec2:ap-southeast-2:000000000000:security-group/sg-011cccd596fe3aece",
+      "rules": [
+        {
+          "direction": "ingress",
+          "protocol": "tcp",
+          "fromPort": 8080,
+          "toPort": 8080,
+          "peer": {
+            "kind": "sg",
+            "value": "sg-0823865aa2bf98c46",
+            "account": "000000000000"
+          },
+          "description": "From ALB"
+        },
+        {
+          "direction": "egress",
+          "protocol": "tcp",
+          "fromPort": 5432,
+          "toPort": 5432,
+          "peer": {
+            "kind": "sg",
+            "value": "sg-03fc7dfa1919e23a4",
+            "account": "000000000000"
+          },
+          "description": "To DB"
+        }
+      ],
+      "tags": {
+        "Name": "reachr-testenv-app",
+        "managedBy": "terraform",
+        "project": "reachr-testenv"
+      }
+    },
+    {
+      "id": "sg-03fc7dfa1919e23a4",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "name": "reachr-testenv-db",
+      "description": "RDS tier",
+      "arn": "arn:aws:ec2:ap-southeast-2:000000000000:security-group/sg-03fc7dfa1919e23a4",
+      "rules": [
+        {
+          "direction": "ingress",
+          "protocol": "tcp",
+          "fromPort": 5432,
+          "toPort": 5432,
+          "peer": {
+            "kind": "sg",
+            "value": "sg-011cccd596fe3aece",
+            "account": "000000000000"
+          },
+          "description": "Postgres from app"
+        }
+      ],
+      "tags": {
+        "Name": "reachr-testenv-db",
+        "managedBy": "terraform",
+        "project": "reachr-testenv"
+      }
+    },
+    {
+      "id": "sg-03782cf05b2b1d7be",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "name": "default",
+      "description": "default VPC security group",
+      "arn": "arn:aws:ec2:ap-southeast-2:000000000000:security-group/sg-03782cf05b2b1d7be",
+      "rules": [
+        {
+          "direction": "ingress",
+          "protocol": "all",
+          "peer": {
+            "kind": "sg",
+            "value": "sg-03782cf05b2b1d7be",
+            "account": "000000000000"
+          }
+        },
+        {
+          "direction": "egress",
+          "protocol": "all",
+          "peer": {
+            "kind": "cidr",
+            "value": "0.0.0.0/0"
+          }
+        }
+      ]
+    }
+  ],
+  "vpcEndpoints": [
+    {
+      "id": "vpce-0ec1a3bec0d211bda",
+      "vpcId": "vpc-0c37291497fa9f1fe",
+      "serviceName": "com.amazonaws.ap-southeast-2.s3",
+      "kind": "gateway",
+      "state": "available",
+      "routeTableIds": [
+        "rtb-05ef41a62420f0302"
+      ],
+      "privateDnsEnabled": false,
+      "tags": {
+        "Name": "reachr-testenv-s3",
+        "managedBy": "terraform",
+        "project": "reachr-testenv"
+      }
+    }
+  ]
+}
