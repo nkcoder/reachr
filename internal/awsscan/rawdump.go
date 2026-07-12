@@ -20,6 +20,7 @@ type RawBackbone struct {
 	NATGateways       []types.NatGateway       `json:"natGateways"`
 	NetworkInterfaces []types.NetworkInterface `json:"networkInterfaces"`
 	SecurityGroups    []types.SecurityGroup    `json:"securityGroups"`
+	VPCEndpoints      []types.VpcEndpoint      `json:"vpcEndpoints"`
 }
 
 // paginator is the shape shared by every EC2 Describe*Paginator.
@@ -87,6 +88,11 @@ func (c *Client) DumpBackbone(ctx context.Context, vpcID string) (*RawBackbone, 
 	if out.SecurityGroups, err = drain(ctx,
 		ec2.NewDescribeSecurityGroupsPaginator(c.EC2, &ec2.DescribeSecurityGroupsInput{Filters: byVPC}),
 		func(p *ec2.DescribeSecurityGroupsOutput) []types.SecurityGroup { return p.SecurityGroups }); err != nil {
+		return nil, err
+	}
+	if out.VPCEndpoints, err = drain(ctx,
+		ec2.NewDescribeVpcEndpointsPaginator(c.EC2, &ec2.DescribeVpcEndpointsInput{Filters: byVPC}),
+		func(p *ec2.DescribeVpcEndpointsOutput) []types.VpcEndpoint { return p.VpcEndpoints }); err != nil {
 		return nil, err
 	}
 	return out, nil
