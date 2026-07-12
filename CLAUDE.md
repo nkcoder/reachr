@@ -4,10 +4,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-**Pre-implementation.** The repo currently contains only `DESIGN.md` (the v1 design spec) and its
-git history. There is no Go module, source code, or build tooling yet. `DESIGN.md` is the source of
-truth for scope and architecture — read it before writing code, and keep it in sync when decisions
-change. Do not invent build/lint/test commands until the corresponding tooling actually exists.
+`DESIGN.md` is the source of truth for scope/architecture — read it before writing code, keep it in
+sync when decisions change. Development is tracked on GitHub (repo `nkcoder/reachr`) as **slice-based
+milestones**; roadmap is issue **#1**. Progress by slice:
+
+- **Slice 0 — skeleton** ✅ Go module, Cobra CLI, CI, Task runner.
+- **Slice 1 — scan + fixture** ✅ `scan` produces a normalized `topology.json`; golden fixture +
+  tests committed. Testenv Terraform was applied, scanned, and **destroyed** (rebuild from `testenv/`
+  if live AWS is needed again).
+- **Slice 2 — structural `dot` render** ⬅️ **NEXT.** `render topology.json --format dot` → Graphviz
+  (nodes + subnet clustering + console deep-links), proof = a PNG of the testenv in the README. First
+  open design fork: **what is a node** — raw ENIs vs already-aggregated logical resources (ENI→resource
+  classification was deliberately deferred to the render layer, so it first bites here).
+- Slices 3–9 (SG engine → route engine → explain → labeling → HTML → filter → NACL/polish): see #1.
+
+### Commands
+
+- `task build` / `task test` / `task lint` (Task runner; `brew install go-task`). CI runs the same.
+- `go run . scan --region <r> [--profile <p>] [--vpc <id>] [--scrub] [--raw]` — the only AWS-touching
+  path. `--raw` dumps raw EC2 JSON; `--scrub` redacts the account id (shareable snapshots / fixtures).
+- Tests + render/explain run offline against `testdata/testenv.golden.json` (sanitized real snapshot).
+
+### Key code
+
+- `internal/topology/` — the `topology.json` schema (`types.go`), design rationale (`doc.go`),
+  `Sanitize` (`sanitize.go`). `SchemaVersion` is a pre-v1 breakable contract.
+- `internal/awsscan/` — AWS SDK v2 client + paginated collectors (`rawdump.go`) and the pure
+  `RawBackbone → topology.Snapshot` mapper (`mapper.go`).
+- `internal/cli/` — Cobra command tree.
+- `testenv/` — free-tier Terraform (private ALB→app→RDS + S3 gw endpoint) that seeds the fixture.
+
+### Schema decisions (from the #7 grill, encoded in `internal/topology/doc.go`)
+
+- **ENI ownership: raw signals stored, classification deferred.** ENI→logical-resource is a heuristic
+  (parse `Description`/`RequesterId`/`InstanceOwnerId`), so it belongs in the render/aggregation layer
+  (Slice 2/6), not the snapshot.
+- **Routes & SG rules ARE normalized in the snapshot** (deterministic unions, not heuristics): routes
+  → `{destination, target, state}` (`GatewayId` sub-typed local/igw/vpce; unmapped → `TargetUnknown`);
+  SG permissions → flattened atomic rules (`{direction, protocol, ports, peer}`).
+- Collections are arrays (engine indexes at load); tags are maps; IPv6 stored but not reasoned in v1.
+
+### Workflow conventions
+
+- One slice at a time; small PR per issue on a branch `slice-N/<topic>`; every PR must be CI-green.
+- Use **`Closes #N`** in the PR body only when it fully finishes an issue (else `Part of #N`).
+- Detail issues just-in-time per slice; don't over-plan far slices. Keep `raw.json`/`vpce.raw.json`
+  out of git (gitignored, unsanitized).
+- GitHub Project #3 board: the token lacks `project` scope, so issues aren't auto-added via CLI
+  (user wires the board via the Auto-add workflow).
 
 ## What this is
 
